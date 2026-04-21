@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>¿Quién quiere ser millonario? - PAE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --verde:#4CAF50;
+    --verde-osc:#2E7D32;
+    --amarillo:#FFC107;
+    --amarillo-osc:#F9A825;
+    --azul:#42A5F5;
+    --azul-osc:#1565C0;
+    --crema:#FFF8E1;
+    --papel:#FFFDF7;
+    --texto:#3E2723;
+    --rojo:#E53935;
+    --gris:#ECEFF1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif}
+  body{
+    background: linear-gradient(135deg,#FFF8E1 0%,#E8F5E9 50%,#E3F2FD 100%);
+    min-height:100vh;
+    color:var(--texto);
+    padding:20px;
+    overflow-x:hidden;
+  }
+  .container{max-width:1000px;margin:0 auto;position:relative;z-index:2;}
+
+  header{
+    text-align:center;
+    padding:20px;
+    background: linear-gradient(135deg, var(--verde) 0%, var(--azul) 100%);
+    border-radius:20px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+    margin-bottom:20px;
+    color:white;
+    animation: slideDown 0.8s ease-out;
+  }
+  header h1{
+    font-size:2rem;
+    margin-bottom:5px;
+    text-shadow:2px 2px 4px rgba(0,0,0,0.3);
+    animation: bounce 2s infinite;
+  }
+  header p{font-size:1.05rem;opacity:0.95;}
+
+  @keyframes slideDown{
+    from{transform:translateY(-50px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+  }
+  @keyframes bounce{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-5px)}
+  }
+  @keyframes fadeIn{
+    from{opacity:0;transform:scale(0.95)}
+    to{opacity:1;transform:scale(1)}
+  }
+  @keyframes slideIn{
+    from{opacity:0;transform:translateX(-30px)}
+    to{opacity:1;transform:translateX(0)}
+  }
+  @keyframes pulseGlow{
+    0%,100%{box-shadow:0 0 10px rgba(76,175,80,0.4)}
+    50%{box-shadow:0 0 25px rgba(76,175,80,0.8)}
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-8px)}
+    50%{transform:translateX(8px)}
+    75%{transform:translateX(-8px)}
+  }
+  @keyframes flashGreen{
+    0%{background:white;transform:scale(1)}
+    50%{background:#4CAF50;transform:scale(1.08);box-shadow:0 0 30px rgba(76,175,80,0.9)}
+    100%{background:#4CAF50;transform:scale(1)}
+  }
+  @keyframes flashRed{
+    0%{background:white}
+    50%{background:#E53935;transform:scale(1.05);box-shadow:0 0 30px rgba(229,57,53,0.8)}
+    100%{background:#E53935}
+  }
+  @keyframes confettiFall{
+    0%{transform:translateY(-100vh) rotate(0);opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+  }
+  @keyframes spin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+  }
+  @keyframes heartbeat{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.06)}
+  }
+
+  .pantalla{
+    background:var(--papel);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    animation: fadeIn 0.6s ease-out;
+  }
+  .oculto{display:none !important;}
+
+  /* INICIO */
+  .inicio{text-align:center;}
+  .inicio h2{color:var(--verde-osc);margin-bottom:15px;font-size:1.8rem;}
+  .inicio p{margin-bottom:20px;line-height:1.6;color:#555;}
+  .emoji-grande{font-size:4rem;margin:10px 0;animation:bounce 2s infinite;}
+  .btn{
+    background:linear-gradient(135deg,var(--amarillo) 0%,var(--amarillo-osc) 100%);
+    color:var(--texto);
+    border:none;
+    padding:14px 30px;
+    font-size:1.1rem;
+    font-weight:bold;
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .btn:hover{
+    transform:translateY(-3px) scale(1.03);
+    box-shadow:0 8px 18px rgba(0,0,0,0.25);
+  }
+  .btn:active{transform:translateY(0) scale(0.98);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+  /* Timer */
+  .timer{
+    display:inline-block;
+    background:var(--azul-osc);
+    color:white;
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:1rem;
+    font-weight:bold;
+    margin-left:10px;
+    font-family:'Courier New',monospace;
+  }
+
+  /* JUEGO */
+  .juego-grid{
+    display:grid;
+    grid-template-columns: 1fr 260px;
+    gap:20px;
+  }
+  @media (max-width:768px){
+    .juego-grid{grid-template-columns: 1fr;}
+    .escalera{order:2;}
+  }
+  .panel-pregunta{
+    background:var(--crema);
+    border-radius:16px;
+    padding:25px;
+    border:3px solid var(--verde);
+    animation: pulseGlow 3s infinite;
+  }
+  .info-ronda{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+    padding-bottom:12px;
+    border-bottom:2px dashed var(--verde);
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .nivel{font-weight:bold;color:var(--verde-osc);font-size:1.05rem;}
+  .premio-actual{
+    background:var(--amarillo);
+    padding:6px 14px;
+    border-radius:20px;
+    font-weight:bold;
+    color:var(--texto);
+    animation: heartbeat 1.5s infinite;
+  }
+  .pregunta-texto{
+    font-size:1.2rem;
+    line-height:1.5;
+    padding:20px;
+    background:white;
+    border-radius:12px;
+    margin-bottom:20px;
+    border-left:5px solid var(--azul);
+    min-height:80px;
+    animation: slideIn 0.5s ease-out;
+  }
+  .opciones{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width:500px){.opciones{grid-template-columns:1fr;}}
+  .opcion{
+    background:white;
+    border:2px solid var(--azul);
+    padding:14px 16px;
+    border-radius:12px;
+    font-size:1rem;
+    cursor:pointer;
+    text-align:left;
+    transition: all 0.2s;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--texto);
+    animation: slideIn 0.5s ease-out backwards;
+  }
+  .opcion:nth-child(1){animation-delay:0.1s}
+  .opcion:nth-child(2){animation-delay:0.2s}
+  .opcion:nth-child(3){animation-delay:0.3s}
+  .opcion:nth-child(4){animation-delay:0.4s}
+  .opcion:hover:not(:disabled){
+    background:var(--azul);
+    color:white;
+    transform:scale(1.03) translateX(4px);
+    box-shadow:0 4px 12px rgba(66,165,245,0.4);
+  }
+  .opcion:disabled{cursor:not-allowed;}
+  .opcion .letra{
+    background:var(--amarillo);
+    color:var(--texto);
+    min-width:32px;
+    height:32px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+  }
+  .opcion.seleccionada{
+    background:var(--amarillo)!important;
+    color:var(--texto)!important;
+    animation: heartbeat 0.8s infinite;
+  }
+  .opcion.correcta{
+    animation: flashGreen 0.6s ease-out forwards;
+    color:white!important;
+    border-color:var(--verde-osc)!important;
+  }
+  .opcion.incorrecta{
+    animation: flashRed 0.6s ease-out forwards, shake 0.4s ease-in-out;
+    color:white!important;
+    border-color:#B71C1C!important;
+  }
+  .opcion.eliminada{opacity:0.2;}
+
+  /* Escalera */
+  .escalera{
+    background:var(--crema);
+    border-radius:16px;
+    padding:15px;
+    border:3px solid var(--amarillo);
+  }
+  .escalera h3{text-align:center;color:var(--verde-osc);margin-bottom:10px;font-size:1rem;}
+  .nivel-item{
+    display:flex;
+    justify-content:space-between;
+    padding:7px 12px;
+    border-radius:8px;
+    margin:3px 0;
+    font-size:0.88rem;
+    color:#666;
+    transition: all 0.4s;
+  }
+  .nivel-item.activo{
+    background:var(--amarillo);
+    color:var(--texto);
+    font-weight:bold;
+    transform:scale(1.05);
+    box-shadow:0 2px 8px rgba(255,193,7,0.5);
+  }
+  .nivel-item.ganado{background:var(--verde);color:white;}
+  .nivel-item.seguro{border-left:4px solid var(--amarillo-osc);font-weight:600;}
+
+  /* Comodines */
+  .comodines{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:15px;
+    flex-wrap:wrap;
+  }
+  .comodin{
+    background:white;
+    border:2px solid var(--verde);
+    color:var(--verde-osc);
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:0.9rem;
+    transition: all 0.2s;
+  }
+  .comodin:hover:not(:disabled){
+    background:var(--verde);color:white;
+    transform:translateY(-3px);
+    box-shadow:0 4px 10px rgba(76,175,80,0.4);
+  }
+  .comodin:disabled{opacity:0.3;cursor:not-allowed;text-decoration:line-through;}
+
+  /* Audio toggle */
+  .audio-toggle{
+    position:fixed;top:15px;right:15px;
+    background:white;
+    border:2px solid var(--verde);
+    border-radius:50%;
+    width:45px;height:45px;
+    font-size:1.3rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    z-index:10;
+    transition: all 0.2s;
+  }
+  .audio-toggle:hover{transform:scale(1.1) rotate(15deg);}
+
+  /* Modal */
+  .modal-bg{
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.6);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    z-index:100;
+    animation: fadeIn 0.3s;
+  }
+  .modal{
+    background:var(--papel);
+    border-radius:16px;
+    padding:25px;
+    max-width:450px;
+    width:100%;
+    text-align:center;
+    border:4px solid var(--verde);
+    animation: fadeIn 0.5s ease-out;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+  .modal h3{color:var(--verde-osc);margin-bottom:15px;}
+
+  .barra-votacion{margin:10px 0;text-align:left;}
+  .barra-votacion .item{margin-bottom:10px;}
+  .barra-votacion .etiqueta{
+    display:flex;justify-content:space-between;
+    font-size:0.9rem;margin-bottom:4px;
+  }
+  .barra{height:18px;background:var(--gris);border-radius:10px;overflow:hidden;}
+  .barra .relleno{
+    height:100%;
+    background:linear-gradient(90deg,var(--verde),var(--azul));
+    transition:width 0.8s;
+  }
+
+  /* Final */
+  .fin{text-align:center;position:relative;}
+  .fin h2{color:var(--verde-osc);font-size:2rem;margin-bottom:10px;animation:heartbeat 1.5s infinite;}
+  .fin .premio{
+    background:linear-gradient(135deg,var(--amarillo),var(--amarillo-osc));
+    padding:20px;
+    border-radius:14px;
+    font-size:1.5rem;
+    font-weight:bold;
+    margin:15px 0;
+    animation:pulseGlow 1.5s infinite;
+    color:var(--texto);
+  }
+  .fin .mensaje{margin:15px 0;line-height:1.6;color:#555;}
+  .confeti-grande{font-size:3rem;margin:10px 0;animation:spin 4s linear infinite;display:inline-block;}
+
+  .estadisticas{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    margin:15px 0;
+    text-align:left;
+    font-size:0.95rem;
+  }
+  .estadisticas div{padding:4px 0;border-bottom:1px dashed #ddd;}
+  .estadisticas div:last-child{border-bottom:none;}
+
+  /* Confeti container */
+  .confeti-contenedor{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    pointer-events:none;z-index:5;overflow:hidden;
+  }
+  .confeti-pieza{
+    position:absolute;top:-10vh;
+    font-size:2rem;
+    animation: confettiFall linear;
+  }
+
+  /* Formulario ganador */
+  .form-group{margin-bottom:14px;text-align:left;}
+  .form-group label{
+    display:block;font-weight:bold;color:var(--verde-osc);
+    margin-bottom:5px;font-size:0.95rem;
+  }
+  .form-group input{
+    width:100%;padding:10px 12px;
+    border:2px solid var(--verde);
+    border-radius:8px;font-size:1rem;
+    transition:border-color 0.2s;
+  }
+  .form-group input:focus{outline:none;border-color:var(--azul-osc);box-shadow:0 0 8px rgba(21,101,192,0.3);}
+  .error-msg{color:var(--rojo);font-size:0.85rem;margin-top:5px;display:none;}
+
+  #qrCode{
+    display:flex;justify-content:center;
+    margin:15px auto;
+    padding:15px;background:white;
+    border-radius:10px;
+    border:3px solid var(--verde);
+    width:fit-content;
+  }
+  .qr-info{
+    background:var(--crema);
+    padding:12px;border-radius:10px;
+    font-size:0.9rem;text-align:left;
+    margin:10px 0;
+    border:1px dashed var(--verde);
+  }
+  .qr-info div{padding:3px 0;}
+</style>
+</head>
+<body>
+
+<!-- Botón audio -->
+<button class="audio-toggle" id="btnAudio" onclick="toggleAudio()" title="Activar/Desactivar música">🔊</button>
+
+<!-- Contenedor para confeti -->
+<div class="confeti-contenedor" id="confetiContenedor"></div>
+
+<div class="container">
+  <header>
+    <h1>🍎 ¿Quién quiere ser millonario? 🏫</h1>
+    <p>Conocimientos sobre el Programa de Alimentación Escolar (PAE)</p>
+  </header>
+
+  <!-- INICIO -->
+  <div id="inicio" class="pantalla inicio">
+    <div class="emoji-grande">🎒📚🍽️</div>
+    <h2>¡Bienvenido al desafío PAE!</h2>
+    <p>Pon a prueba lo que sabes sobre el <strong>Programa de Alimentación Escolar</strong> en Colombia.<br>
+    Son <strong>10 preguntas</strong> de dificultad creciente con 3 comodines:</p>
+    <p style="margin:15px 0;">
+      <strong>50:50</strong> · <strong>Pregunta al Público</strong> · <strong>Cambio de Pregunta</strong>
+    </p>
+    <p>🏆 Solo quienes completen las 10 preguntas y ganen el <strong>premio máximo</strong> podrán generar su certificado QR.</p>
+    <p style="font-size:0.9rem;color:#777;margin-top:10px;">🎵 La música de suspenso se activará al comenzar.</p>
+    <br>
+    <button class="btn" onclick="iniciarJuego()">🚀 Comenzar el juego</button>
+  </div>
+
+  <!-- JUEGO -->
+  <div id="juego" class="pantalla oculto">
+    <div class="juego-grid">
+      <div>
+        <div class="panel-pregunta">
+          <div class="info-ronda">
+            <span class="nivel" id="nivelActual">Pregunta 1 de 10</span>
+            <span class="timer" id="cronometro">⏱️ 00:00</span>
+            <span class="premio-actual" id="premioActual">$100.000</span>
+          </div>
+          <div class="pregunta-texto" id="preguntaTexto"></div>
+          <div class="opciones" id="opciones"></div>
+        </div>
+        <div class="comodines">
+          <button class="comodin" id="com5050" onclick="usar5050()">50 : 50</button>
+          <button class="comodin" id="comPublico" onclick="usarPublico()">👥 Público</button>
+          <button class="comodin" id="comCambio" onclick="usarCambio()">🔄 Cambiar pregunta</button>
+        </div>
+      </div>
+      <aside class="escalera">
+        <h3>🏆 Escalera de premios</h3>
+        <div id="listaNiveles"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- FINAL -->
+  <div id="final" class="pantalla fin oculto">
+    <div class="confeti-grande" id="emojiFinal">🎉</div>
+    <h2 id="tituloFinal">¡Felicitaciones!</h2>
+    <div class="premio" id="premioFinal">$0</div>
+    <p class="mensaje" id="mensajeFinal"></p>
+    <div class="estadisticas" id="estadisticasFinal"></div>
+    <button class="btn" onclick="reiniciar()">🔁 Jugar otra vez</button>
+  </div>
+
+  <!-- MODAL PÚBLICO -->
+  <div id="modalPublico" class="modal-bg oculto">
+    <div class="modal">
+      <h3>👥 El público ha votado</h3>
+      <div class="barra-votacion" id="barrasPublico"></div>
+      <button class="btn" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL GANADOR -->
+  <div id="modalGanador" class="modal-bg oculto">
+    <div class="modal">
+      <h3>🏆 ¡PREMIO MÁXIMO ALCANZADO! 🏆</h3>
+      <p style="margin-bottom:15px;">Completa tus datos para generar tu certificado QR:</p>
+      <form id="formGanador" onsubmit="generarQR(event)">
+        <div class="form-group">
+          <label for="nombre">Nombre completo *</label>
+          <input type="text" id="nombre" required placeholder="Ej. Juan Pérez García"/>
+        </div>
+        <div class="form-group">
+          <label for="cedula">Cédula *</label>
+          <input type="text" id="cedula" required placeholder="Ej. 1234567890" inputmode="numeric"/>
+        </div>
+        <div class="form-group">
+          <label for="municipio">Municipio *</label>
+          <input type="text" id="municipio" required placeholder="Ej. Medellín"/>
+        </div>
+        <div class="form-group">
+          <label for="cargo">Cargo *</label>
+          <input type="text" id="cargo" required placeholder="Ej. Rector, Docente, Coordinador PAE..."/>
+        </div>
+        <button type="submit" class="btn">✨ Generar certificado QR</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL QR -->
+  <div id="modalQR" class="modal-bg oculto">
+    <div class="modal">
+      <h3>🎓 Certificado PAE Millonario</h3>
+      <div class="qr-info" id="qrInfo"></div>
+      <div id="qrCode"></div>
+      <p style="font-size:0.85rem;color:#666;margin:10px 0;">Escanea el QR para ver los datos del certificado.</p>
+      <button class="btn" onclick="descargarQR()">📥 Descargar QR</button>
+      <button class="btn" style="margin-top:10px;background:linear-gradient(135deg,#ECEFF1,#CFD8DC);" onclick="cerrarQR()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== BANCO DE PREGUNTAS ==========
+const bancoPreguntas = [
+  {pregunta:"¿Qué significa la sigla PAE?", opciones:["Programa de Alimentación Escolar","Plan de Ahorro Educativo","Proyecto Académico Especial","Programa de Apoyo al Estudiante"], correcta:0, dificultad:1},
+  {pregunta:"¿Cuál es el objetivo principal del PAE?", opciones:["Entregar uniformes escolares","Contribuir al acceso y permanencia escolar mediante alimentación","Financiar salidas pedagógicas","Proveer transporte escolar"], correcta:1, dificultad:1},
+  {pregunta:"¿En qué tipo de instituciones se implementa principalmente el PAE?", opciones:["Universidades privadas","Instituciones educativas oficiales","Centros de adulto mayor","Empresas privadas"], correcta:1, dificultad:1},
+  {pregunta:"¿A qué población está dirigido el PAE?", opciones:["Docentes de planta","Niños, niñas y adolescentes matriculados en colegios oficiales","Personal administrativo","Padres de familia"], correcta:1, dificultad:1},
+  {pregunta:"¿Cuál es uno de los complementos alimentarios más comunes que entrega el PAE?", opciones:["Solo agua potable","Almuerzo o complemento en jornada escolar","Suplementos vitamínicos únicamente","Alimentos enlatados solamente"], correcta:1, dificultad:2},
+  {pregunta:"¿Qué entidad dirige actualmente el PAE a nivel nacional en Colombia?", opciones:["Ministerio de Salud","ICBF","Unidad Administrativa Especial de Alimentación Escolar – Alimentos para Aprender","Ministerio de Agricultura"], correcta:2, dificultad:2},
+  {pregunta:"¿Qué requisito deben cumplir los manipuladores de alimentos del PAE?", opciones:["Ser bachilleres","Contar con certificado de manipulación de alimentos vigente","Tener más de 40 años","Estar afiliados a una EPS privada"], correcta:1, dificultad:2},
+  {pregunta:"¿Qué significa 'focalización' dentro del PAE?", opciones:["Hacer foco en la infraestructura","Priorizar beneficiarios según criterios de vulnerabilidad","Concentrar recursos en una sola región","Realizar campañas fotográficas"], correcta:1, dificultad:3},
+  {pregunta:"¿Qué entidades realizan control y vigilancia sobre los recursos del PAE?", opciones:["Solo la alcaldía municipal","Contraloría, Procuraduría y veedurías ciudadanas","Únicamente el rector del colegio","Las empresas de vigilancia privada"], correcta:1, dificultad:3},
+  {pregunta:"¿Cuál es uno de los principales enfoques del PAE además de lo nutricional?", opciones:["Enfoque turístico","Enfoque diferencial y territorial","Enfoque militar","Enfoque deportivo de alto rendimiento"], correcta:1, dificultad:3},
+  {pregunta:"¿Qué tipo de minuta utiliza el PAE para planear las raciones?", opciones:["Minuta libre","Minuta patrón con ciclos","Minuta improvisada diaria","Minuta fotográfica"], correcta:1, dificultad:2},
+  {pregunta:"¿Quién es el responsable de la operación del PAE en cada territorio?", opciones:["El Presidente de la República","Las Entidades Territoriales Certificadas (ETC)","La ONU","Los padres de familia"], correcta:1, dificultad:3},
+  {pregunta:"¿Qué documento establece los lineamientos técnicos del PAE?", opciones:["Código Penal","Resoluciones de la UApA / Ministerio de Educación","Ley 100 de 1993","Reglamento de tránsito"], correcta:1, dificultad:3},
+];
+
+const premios = [
+  "$100.000","$200.000","$300.000","$500.000","$1.000.000",
+  "$2.000.000","$5.000.000","$10.000.000","$25.000.000","$50.000.000"
+];
+const nivelesSeguros = [4, 9];
+
+let estado = {
+  preguntasJuego:[], indice:0, preguntasDisponibles:[],
+  comodines:{c5050:true,publico:true,cambio:true},
+  correctas:0, premioGanado:"$0", bloqueado:false,
+  tiempoInicio:0, tiempoTotal:0, cronoInterval:null,
+  datosGanador:null
+};
+
+// ========== AUDIO ==========
+let audioCtx = null;
+let audioOn = true;
+let nodosActivos = []; // para poder detener el fondo
+let fondoPlaying = false;
+
+function initAudio(){
+  if(audioCtx) return;
+  try{
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }catch(e){console.warn("Audio no disponible");}
+}
+
+function toggleAudio(){
+  audioOn = !audioOn;
+  document.getElementById("btnAudio").textContent = audioOn ? "🔊" : "🔇";
+  if(!audioOn){
+    detenerFondo();
+  } else if(estado.tiempoInicio && !fondoPlaying){
+    iniciarFondo();
+  }
+}
+
+// Música de suspenso: drone bajo + arpegio modulado
+function iniciarFondo(){
+  if(!audioCtx || !audioOn || fondoPlaying) return;
+  fondoPlaying = true;
+  const now = audioCtx.currentTime;
+
+  // Drone bajo
+  const oscBass = audioCtx.createOscillator();
+  oscBass.type = "sine";
+  oscBass.frequency.value = 55; // A1
+  const gainBass = audioCtx.createGain();
+  gainBass.gain.value = 0.0;
+  gainBass.gain.linearRampToValueAtTime(0.12, now + 1);
+  oscBass.connect(gainBass).connect(audioCtx.destination);
+  oscBass.start(now);
+
+  // LFO para hacer pulsar el drone
+  const lfo = audioCtx.createOscillator();
+  lfo.frequency.value = 0.5;
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 0.04;
+  lfo.connect(lfoGain).connect(gainBass.gain);
+  lfo.start(now);
+
+  // Drone medio (quinta)
+  const oscMed = audioCtx.createOscillator();
+  oscMed.type = "triangle";
+  oscMed.frequency.value = 82.41; // E2
+  const gainMed = audioCtx.createGain();
+  gainMed.gain.value = 0.0;
+  gainMed.gain.linearRampToValueAtTime(0.06, now + 2);
+  oscMed.connect(gainMed).connect(audioCtx.destination);
+  oscMed.start(now);
+
+  // Tensión: notas agudas esporádicas
+  const tensionInterval = setInterval(()=>{
+    if(!audioOn || !fondoPlaying) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    // Nota de tensión en escala menor
+    const notas = [440, 466.16, 523.25, 554.37, 622.25];
+    osc.frequency.value = notas[Math.floor(Math.random()*notas.length)];
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.04, t + 0.1);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + 1.5);
+  }, 3500);
+
+  nodosActivos.push({oscBass, lfo, oscMed, gainBass, gainMed, tensionInterval});
+}
+
+function detenerFondo(){
+  fondoPlaying = false;
+  nodosActivos.forEach(n=>{
+    try{
+      const t = audioCtx ? audioCtx.currentTime : 0;
+      n.gainBass.gain.linearRampToValueAtTime(0, t + 0.3);
+      n.gainMed.gain.linearRampToValueAtTime(0, t + 0.3);
+      setTimeout(()=>{
+        try{n.oscBass.stop();n.oscMed.stop();n.lfo.stop();}catch(e){}
+      }, 400);
+      clearInterval(n.tensionInterval);
+    }catch(e){}
+  });
+  nodosActivos = [];
+}
+
+function sonidoCorrecto(){
+  if(!audioCtx || !audioOn) return;
+  const t = audioCtx.currentTime;
+  [523.25, 659.25, 783.99].forEach((f,i)=>{
+    const o = audioCtx.createOscillator();
+    o.type = "sine";
+    o.frequency.value = f;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0, t + i*0.1);
+    g.gain.linearRampToValueAtTime(0.2, t + i*0.1 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i*0.1 + 0.5);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t + i*0.1);
+    o.stop(t + i*0.1 + 0.5);
+  });
+}
+
+function sonidoIncorrecto(){
+  if(!audioCtx || !audioOn) return;
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(220, t);
+  o.frequency.exponentialRampToValueAtTime(55, t + 1);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.25, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t);
+  o.stop(t + 1.2);
+}
+
+function sonidoVictoria(){
+  if(!audioCtx || !audioOn) return;
+  const t = audioCtx.currentTime;
+  const notas = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+  notas.forEach((f,i)=>{
+    const o = audioCtx.createOscillator();
+    o.type = "triangle";
+    o.frequency.value = f;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0, t + i*0.15);
+    g.gain.linearRampToValueAtTime(0.25, t + i*0.15 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i*0.15 + 0.8);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t + i*0.15);
+    o.stop(t + i*0.15 + 0.8);
+  });
+}
+
+function sonidoClick(){
+  if(!audioCtx || !audioOn) return;
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  o.type = "square";
+  o.frequency.value = 880;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.08, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t); o.stop(t + 0.1);
+}
+
+// ========== UTILIDADES ==========
+function mezclar(arr){
+  const c=[...arr];
+  for(let i=c.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [c[i],c[j]]=[c[j],c[i]];
+  }
+  return c;
+}
+
+function seleccionarPreguntas(){
+  const f = bancoPreguntas.filter(p=>p.dificultad===1);
+  const m = bancoPreguntas.filter(p=>p.dificultad===2);
+  const d = bancoPreguntas.filter(p=>p.dificultad===3);
+  const sel = mezclar(f).slice(0,4).concat(mezclar(m).slice(0,3)).concat(mezclar(d).slice(0,3));
+  const usadas = new Set(sel.map(p=>p.pregunta));
+  estado.preguntasDisponibles = bancoPreguntas.filter(p=>!usadas.has(p.pregunta));
+  return sel;
+}
+
+// ========== CRONÓMETRO ==========
+function iniciarCronometro(){
+  estado.tiempoInicio = Date.now();
+  estado.cronoInterval = setInterval(()=>{
+    const t = Math.floor((Date.now() - estado.tiempoInicio)/1000);
+    const min = String(Math.floor(t/60)).padStart(2,"0");
+    const seg = String(t%60).padStart(2,"0");
+    document.getElementById("cronometro").textContent = `⏱️ ${min}:${seg}`;
+  }, 500);
+}
+function detenerCronometro(){
+  if(estado.cronoInterval){
+    clearInterval(estado.cronoInterval);
+    estado.cronoInterval = null;
+  }
+  estado.tiempoTotal = Math.floor((Date.now() - estado.tiempoInicio)/1000);
+}
+function formatearTiempo(seg){
+  const m = Math.floor(seg/60);
+  const s = seg%60;
+  return `${m} min ${s} seg`;
+}
+
+// ========== FLUJO ==========
+function iniciarJuego(){
+  initAudio();
+  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  estado.preguntasJuego = seleccionarPreguntas();
+  estado.indice = 0;
+  estado.correctas = 0;
+  estado.premioGanado = "$0";
+  estado.comodines = {c5050:true,publico:true,cambio:true};
+  estado.bloqueado = false;
+  estado.datosGanador = null;
+  document.getElementById("inicio").classList.add("oculto");
+  document.getElementById("final").classList.add("oculto");
+  document.getElementById("juego").classList.remove("oculto");
+  document.getElementById("com5050").disabled = false;
+  document.getElementById("comPublico").disabled = false;
+  document.getElementById("comCambio").disabled = false;
+  renderEscalera();
+  mostrarPregunta();
+  iniciarCronometro();
+  iniciarFondo();
+}
+
+function renderEscalera(){
+  const cont = document.getElementById("listaNiveles");
+  cont.innerHTML = "";
+  for(let i=premios.length-1;i>=0;i--){
+    const item = document.createElement("div");
+    item.className = "nivel-item";
+    if(nivelesSeguros.includes(i)) item.classList.add("seguro");
+    if(i === estado.indice) item.classList.add("activo");
+    if(i < estado.indice) item.classList.add("ganado");
+    item.innerHTML = `<span>${i+1}</span><span>${premios[i]}</span>`;
+    cont.appendChild(item);
+  }
+}
+
+function mostrarPregunta(){
+  const p = estado.preguntasJuego[estado.indice];
+  document.getElementById("nivelActual").textContent = `Pregunta ${estado.indice+1} de 10`;
+  document.getElementById("premioActual").textContent = premios[estado.indice];
+  document.getElementById("preguntaTexto").textContent = p.pregunta;
+  const cont = document.getElementById("opciones");
+  cont.innerHTML = "";
+  const letras = ["A","B","C","D"];
+  p.opciones.forEach((op,idx)=>{
+    const btn = document.createElement("button");
+    btn.className = "opcion";
+    btn.dataset.idx = idx;
+    btn.innerHTML = `<span class="letra">${letras[idx]}</span><span>${op}</span>`;
+    btn.onclick = ()=>{sonidoClick();responder(idx, btn);};
+    cont.appendChild(btn);
+  });
+  renderEscalera();
+}
+
+function responder(idx, btn){
+  if(estado.bloqueado) return;
+  estado.bloqueado = true;
+  const p = estado.preguntasJuego[estado.indice];
+  const botones = document.querySelectorAll(".opcion");
+  botones.forEach(b=>b.disabled = true);
+  btn.classList.add("seleccionada");
+
+  // Suspenso de 1.5s antes de revelar
+  setTimeout(()=>{
+    btn.classList.remove("seleccionada");
+    if(idx === p.correcta){
+      btn.classList.add("correcta");
+      sonidoCorrecto();
+      estado.correctas++;
+      estado.premioGanado = premios[estado.indice];
+      setTimeout(()=>{
+        estado.indice++;
+        estado.bloqueado = false;
+        if(estado.indice >= estado.preguntasJuego.length){
+          terminar(true);
+        } else { mostrarPregunta(); }
+      }, 1300);
+    } else {
+      btn.classList.add("incorrecta");
+      sonidoIncorrecto();
+      botones.forEach(b=>{
+        if(parseInt(b.dataset.idx) === p.correcta) b.classList.add("correcta");
+      });
+      let premioFinal = "$0";
+      for(let i=estado.indice-1;i>=0;i--){
+        if(nivelesSeguros.includes(i)){premioFinal = premios[i];break;}
+      }
+      estado.premioGanado = premioFinal;
+      setTimeout(()=>terminar(false), 2200);
+    }
+  }, 1500);
+}
+
+function lanzarConfeti(){
+  const cont = document.getElementById("confetiContenedor");
+  cont.innerHTML = "";
+  const emojis = ["🎉","🎊","⭐","🏆","💰","🌟","🎈"];
+  for(let i=0;i<50;i++){
+    const p = document.createElement("div");
+    p.className = "confeti-pieza";
+    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left = Math.random()*100 + "%";
+    p.style.animationDuration = (2 + Math.random()*3) + "s";
+    p.style.animationDelay = Math.random()*2 + "s";
+    cont.appendChild(p);
+  }
+  setTimeout(()=>{cont.innerHTML="";}, 6000);
+}
+
+function terminar(ganoTodo){
+  detenerCronometro();
+  detenerFondo();
+  document.getElementById("juego").classList.add("oculto");
+  document.getElementById("final").classList.remove("oculto");
+  const emoji = document.getElementById("emojiFinal");
+  const titulo = document.getElementById("tituloFinal");
+  const premioEl = document.getElementById("premioFinal");
+  const mensaje = document.getElementById("mensajeFinal");
+  premioEl.textContent = estado.premioGanado;
+
+  if(ganoTodo){
+    emoji.textContent = "🏆";
+    titulo.textContent = "¡Eres un experto/a en el PAE!";
+    mensaje.textContent = "Respondiste correctamente las 10 preguntas. ¡Genera tu certificado QR!";
+    sonidoVictoria();
+    lanzarConfeti();
+    // Mostrar modal ganador tras pequeña pausa
+    setTimeout(()=>{
+      document.getElementById("modalGanador").classList.remove("oculto");
+    }, 1500);
+  } else {
+    if(estado.correctas >= 7){
+      emoji.textContent = "👏";
+      titulo.textContent = "¡Muy buen desempeño!";
+      mensaje.textContent = "Tienes sólidos conocimientos sobre el PAE. Sigue estudiando para llegar al premio mayor y obtener tu certificado.";
+    } else if(estado.correctas >= 4){
+      emoji.textContent = "📘";
+      titulo.textContent = "¡Buen intento!";
+      mensaje.textContent = "Vas por buen camino. Repasa los lineamientos del PAE para mejorar.";
+    } else {
+      emoji.textContent = "📚";
+      titulo.textContent = "Hay que seguir aprendiendo";
+      mensaje.textContent = "El PAE tiene muchos detalles importantes. ¡Anímate a repasar y volver a jugar!";
+    }
+  }
+  const stats = document.getElementById("estadisticasFinal");
+  stats.innerHTML = `
+    <div><strong>Preguntas correctas:</strong> ${estado.correctas} / 10</div>
+    <div><strong>Premio obtenido:</strong> ${estado.premioGanado}</div>
+    <div><strong>Tiempo total:</strong> ${formatearTiempo(estado.tiempoTotal)}</div>
+    <div><strong>Comodines usados:</strong> ${3 - Object.values(estado.comodines).filter(x=>x).length} / 3</div>
+  `;
+}
+
+function reiniciar(){
+  document.getElementById("final").classList.add("oculto");
+  document.getElementById("inicio").classList.remove("oculto");
+  document.getElementById("confetiContenedor").innerHTML = "";
+}
+
+// ========== COMODINES ==========
+function usar5050(){
+  if(!estado.comodines.c5050 || estado.bloqueado) return;
+  sonidoClick();
+  estado.comodines.c5050 = false;
+  document.getElementById("com5050").disabled = true;
+  const p = estado.preguntasJuego[estado.indice];
+  const incorrectas = [];
+  for(let i=0;i<4;i++) if(i !== p.correcta) incorrectas.push(i);
+  const quitar = mezclar(incorrectas).slice(0,2);
+  document.querySelectorAll(".opcion").forEach(b=>{
+    if(quitar.includes(parseInt(b.dataset.idx))){
+      b.classList.add("eliminada");
+      b.disabled = true;
+    }
+  });
+}
+
+function usarPublico(){
+  if(!estado.comodines.publico || estado.bloqueado) return;
+  sonidoClick();
+  estado.comodines.publico = false;
+  document.getElementById("comPublico").disabled = true;
+  const p = estado.preguntasJuego[estado.indice];
+  const base = p.dificultad === 1 ? 70 : p.dificultad === 2 ? 55 : 42;
+  const variacion = Math.floor(Math.random()*10)-5;
+  let correcta = base + variacion;
+  let resto = 100 - correcta;
+  const pesos = [Math.random(), Math.random(), Math.random()];
+  const sum = pesos.reduce((a,b)=>a+b,0);
+  const distribucion = pesos.map(w=>Math.round((w/sum)*resto));
+  let totalDist = distribucion.reduce((a,b)=>a+b,0) + correcta;
+  distribucion[0] += 100 - totalDist;
+
+  const porcentajes = [];
+  let idx = 0;
+  for(let i=0;i<4;i++){
+    if(i === p.correcta) porcentajes[i] = correcta;
+    else { porcentajes[i] = distribucion[idx]; idx++; }
+  }
+  const cont = document.getElementById("barrasPublico");
+  cont.innerHTML = "";
+  const letras = ["A","B","C","D"];
+  porcentajes.forEach((v,i)=>{
+    const item = document.createElement("div");
+    item.className = "item";
+    item.innerHTML = `
+      <div class="etiqueta"><span>${letras[i]}: ${p.opciones[i]}</span><span>${v}%</span></div>
+      <div class="barra"><div class="relleno" style="width:0%"></div></div>
+    `;
+    cont.appendChild(item);
+    setTimeout(()=>{item.querySelector(".relleno").style.width = v + "%";}, 80*i+50);
+  });
+  document.getElementById("modalPublico").classList.remove("oculto");
+}
+
+function cerrarModal(){
+  sonidoClick();
+  document.getElementById("modalPublico").classList.add("oculto");
+}
+
+function usarCambio(){
+  if(!estado.comodines.cambio || estado.bloqueado) return;
+  sonidoClick();
+  if(estado.preguntasDisponibles.length === 0){
+    alert("No hay más preguntas disponibles para cambiar.");
+    return;
+  }
+  estado.comodines.cambio = false;
+  document.getElementById("comCambio").disabled = true;
+  const nueva = estado.preguntasDisponibles.shift();
+  estado.preguntasJuego[estado.indice] = nueva;
+  mostrarPregunta();
+}
+
+// ========== QR Y FORMULARIO GANADOR ==========
+function generarQR(ev){
+  ev.preventDefault();
+  const nombre = document.getElementById("nombre").value.trim();
+  const cedula = document.getElementById("cedula").value.trim();
+  const municipio = document.getElementById("municipio").value.trim();
+  const cargo = document.getElementById("cargo").value.trim();
+  if(!nombre || !cedula || !municipio || !cargo){
+    alert("Por favor completa todos los campos.");
+    return;
+  }
+  estado.datosGanador = {nombre, cedula, municipio, cargo};
+
+  const fecha = new Date().toLocaleString("es-CO");
+  const tiempo = formatearTiempo(estado.tiempoTotal);
+  const contenido =
+    `CERTIFICADO PAE MILLONARIO\n` +
+    `Nombre: ${nombre}\n` +
+    `Cédula: ${cedula}\n` +
+    `Municipio: ${municipio}\n` +
+    `Cargo: ${cargo}\n` +
+    `Premio ganado: ${estado.premioGanado}\n` +
+    `Tiempo: ${tiempo}\n` +
+    `Preguntas correctas: ${estado.correctas}/10\n` +
+    `Fecha: ${fecha}`;
+
+  // Cerrar modal de datos
+  document.getElementById("modalGanador").classList.add("oculto");
+
+  // Llenar info
+  document.getElementById("qrInfo").innerHTML = `
+    <div><strong>👤 Nombre:</strong> ${nombre}</div>
+    <div><strong>🪪 Cédula:</strong> ${cedula}</div>
+    <div><strong>📍 Municipio:</strong> ${municipio}</div>
+    <div><strong>💼 Cargo:</strong> ${cargo}</div>
+    <div><strong>💰 Premio:</strong> ${estado.premioGanado}</div>
+    <div><strong>⏱️ Tiempo:</strong> ${tiempo}</div>
+    <div><strong>📅 Fecha:</strong> ${fecha}</div>
+  `;
+
+  // Generar QR
+  const qrDiv = document.getElementById("qrCode");
+  qrDiv.innerHTML = "";
+  new QRCode(qrDiv, {
+    text: contenido,
+    width: 220, height: 220,
+    colorDark: "#2E7D32",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById("modalQR").classList.remove("oculto");
+}
+
+function descargarQR(){
+  sonidoClick();
+  const img = document.querySelector("#qrCode img") || document.querySelector("#qrCode canvas");
+  if(!img) return;
+  let dataUrl;
+  if(img.tagName === "CANVAS") dataUrl = img.toDataURL("image/png");
+  else dataUrl = img.src;
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  const nombreArchivo = (estado.datosGanador?.nombre || "ganador").replace(/\s+/g,"_");
+  a.download = `certificado_PAE_${nombreArchivo}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function cerrarQR(){
+  sonidoClick();
+  document.getElementById("modalQR").classList.add("oculto");
+}
+</script>
+</body>
+</html>
